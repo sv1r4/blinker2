@@ -1,5 +1,5 @@
 {
-    "description": "Arduino/Esp8266 RGB Led Effects Librray", 
+    "description": "Arduino Esp8266 RGB Led Effects Librray", 
     "repository": {
         "url": "https://github.com/sv1r4/blinker2", 
         "type": "git"
