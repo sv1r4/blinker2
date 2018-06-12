@@ -109,15 +109,12 @@
     function getConfig() {
         var url = $("#url").val();
         console.log("get config");
-        // var data = { fadeDelay: 15, colorDelay: 100, delta: 5, seqCnt: 12, seq: [65280, 12477429, 33023, 33023, 8453888, 16711935, 0, 0, 0, 0, 0, 0] };
-        // showConfig(data);
         $.ajax({
             url: url,
             type: "GET",
             crossDomain: true,
-            success: function (json) {
-                console.log("got config:\n" + json);
-                var data = JSON.parse(json);
+            success: function (data) {
+                console.log("got config:\n" + JSON.stringify(data));
                 showConfig(data);
             },
             error: function (e) {
@@ -159,13 +156,15 @@
         var url = $("#url").val();
 
         var data = getConfigObject();
-        console.log("data:\n" + JSON.stringify(data));
+        var json= JSON.stringify(data);
+        console.log("data:\n" + json);
         $.ajax({
             url: url,
             type: "POST",
             crossDomain: true,
-            dataType: "application/json",
-            data: data,
+            dataType: "json",
+            contentType: "application/json",
+            data: json,
             success: function (res) {
                 console.log("success");
             },

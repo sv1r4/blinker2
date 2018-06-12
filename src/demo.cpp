@@ -3,8 +3,8 @@
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 
-#define SSID "ssid"
-#define PASSWORD "password"
+#define SSID "balloon"
+#define PASSWORD "balL00n17988028"
 #define LED 13
 #define NUMPIXELS 1
 
@@ -19,38 +19,60 @@ void initOta()
     ArduinoOTA.onStart([]() {
         String type;
         if (ArduinoOTA.getCommand() == U_FLASH)
+        {
             type = "sketch";
-        else // U_SPIFFS
+        }
+        else
+        { // U_SPIFFS
             type = "filesystem";
+        }
 
         // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
         Serial.println("Start updating " + type);
     });
     ArduinoOTA.onEnd([]() {
-        Serial.println("end");
+        Serial.println("\nEnd");
     });
     ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
         Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
     });
     ArduinoOTA.onError([](ota_error_t error) {
-        Serial.println("Error: " + error);
+        Serial.printf("Error[%u]: ", error);
         if (error == OTA_AUTH_ERROR)
-            Serial.println(F("Auth Failed"));
+        {
+            Serial.println("Auth Failed");
+        }
         else if (error == OTA_BEGIN_ERROR)
-            Serial.println(F("Begin Failed"));
+        {
+            Serial.println("Begin Failed");
+        }
         else if (error == OTA_CONNECT_ERROR)
-            Serial.println(F("Connect Failed"));
+        {
+            Serial.println("Connect Failed");
+        }
         else if (error == OTA_RECEIVE_ERROR)
-            Serial.println(F("Receive Failed"));
+        {
+            Serial.println("Receive Failed");
+        }
         else if (error == OTA_END_ERROR)
-            Serial.println(F("End Failed"));
+        {
+            Serial.println("End Failed");
+        }
     });
     ArduinoOTA.begin();
 }
 
 void onConfig()
 {
-    if (http.method() == HTTP_POST)
+    http.sendHeader("Access-Control-Allow-Origin", "*");
+
+    if (http.method() == HTTP_OPTIONS)
+    {
+        http.sendHeader("Access-Control-Allow-Methods", "POST, GET");
+        http.sendHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type");
+        http.send(200);
+    }
+    else if (http.method() == HTTP_POST )
     {
         DynamicJsonBuffer jsonBuffer(4096);
         String body = http.arg(F("plain"));
@@ -73,6 +95,7 @@ void onConfig()
         {
             blinker.setSeqColor(i, root["seq"][i]);
         }
+
         http.send(200, "text/plain", "got config");
     }
     else if (http.method() == HTTP_GET)
@@ -88,10 +111,12 @@ void onConfig()
         json.concat(",\"delta\":");
         json.concat(blinker.getDelta());
         json.concat(",\"seq\":[");
-        for (int i = 0; i < seqCnt; i++)
+        for (int i = 0; i < seqCnt - 1; i++)
         {
             json.concat(blinker.getSeqColor(i));
+            json.concat(",");
         }
+        json.concat(blinker.getSeqColor(seqCnt - 1));
         json.concat("]}");
         Serial.println("Get config");
         Serial.println(json);
@@ -139,7 +164,7 @@ void setup()
     http.on("/api/config", onConfig);
     http.begin();
     blinker.start();
-    initOta();
+    //initOta();
 }
 
 void loop()
@@ -152,6 +177,7 @@ void loop()
         http.stop();
         http.on("/api/config", onConfig);
         http.begin();
+        initOta();
     }
     else if (wasConnected && WiFi.status() != WL_CONNECTED)
     {
