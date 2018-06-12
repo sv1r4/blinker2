@@ -1,0 +1,14 @@
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
+.vscode/c_cpp_properties.json
+.vscode/BROWSE.VC.DB
+.vscode/BROWSE.VC.DB-wal
+.vscode/BROWSE.VC.DB-shm
+.vscode/settings.json
+.vscode/launch.json
+*.bin
+.vscode/*.db
+.vscode/*.DB*
+.vscode/.browse.c_cpp.db*
