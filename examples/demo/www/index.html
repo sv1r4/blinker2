@@ -37,6 +37,9 @@
                             <div class="col-auto">
                                 <a href="#" onclick="sendConfig();" class="btn btn-primary">Post Config</a>
                             </div>
+                            <div class="col-auto">
+                                <a href="#" onclick="getConfig();" class="btn">Get Config</a>
+                            </div>
 
                         </div>
                         <div class="form-group">
@@ -97,27 +100,59 @@
 
     });
 
+    function getConfig() {
+        var url = $("#url").val();
+        console.log("get config");
+        var data = { fadeDelay: 15, colorDelay: 100, delta: 5, seqCnt: 12, seq: [65280, 12477429, 33023, 33023, 8453888, 16711935, 0, 0, 0, 0, 0, 0] };
+        showConfig(data);
+        $.ajax({
+            url: url,
+            type: "GET",
+            crossDomain:true,
+            success: function (json) {
+                console.log("got config:\n" + json);
+                var data = JSON.parse(json);                
+                showConfig(data);
+            },
+            error: function (e) {
+                console.error("error get config\n" + e.statusText);
+            }
+        });
+    }
+
+    function showConfig(data) {
+        for (var p in data) {
+            $("input[name='" + p + "']").val(data[p]);            
+        }
+        for(var i=0;i<data.seqCnt;i++){
+            var hex = data.seq[i].toString(16);
+            hex = ('000000'+hex).substring(hex.length);
+            $("#color_"+i).val("#"+hex);
+        }
+    }
+
     function sendConfig() {
         var url = $("#url").val();
-        
+
         var data = objectifyForm($("form").serializeArray());
-        data.color = [];
+        data.seq = [];
         if (data.seqCnt) {
             for (var i = 0; i < data.seqCnt; i++) {
-                data.color[i] = parseInt($("#color_" + i).val().replace("#", "0x"));
+                data.seq[i] = parseInt($("#color_" + i).val().replace("#", "0x"));
             }
         };
         console.log("data:\n" + JSON.stringify(data));
         $.ajax({
             url: url,
             type: "POST",
+            crossDomain:true,
             dataType: "application/json",
             data: data,
             success: function (res) {
                 console.log("success");
             },
             error: function (e) {
-                console.error("error post config\n"+ e.statusText);
+                console.error("error post config\n" + e.statusText);
             }
         });
     };
@@ -130,7 +165,7 @@
             if (!isNaN(val)) {
                 val = parseInt(val);
             }
-            if(val===""){
+            if (val === "") {
                 val = null;
             }
             returnArray[formArray[i]['name']] = val;
