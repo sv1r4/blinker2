@@ -97,14 +97,14 @@
                 + '                   </div>'
                 + '              </div>');
         }
-
+        getConfig();
     });
 
     function getConfig() {
         var url = $("#url").val();
         console.log("get config");
-        var data = { fadeDelay: 15, colorDelay: 100, delta: 5, seqCnt: 12, seq: [65280, 12477429, 33023, 33023, 8453888, 16711935, 0, 0, 0, 0, 0, 0] };
-        showConfig(data);
+        // var data = { fadeDelay: 15, colorDelay: 100, delta: 5, seqCnt: 12, seq: [65280, 12477429, 33023, 33023, 8453888, 16711935, 0, 0, 0, 0, 0, 0] };
+        // showConfig(data);
         $.ajax({
             url: url,
             type: "GET",
