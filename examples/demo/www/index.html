@@ -20,6 +20,9 @@
             height: 30px;
             flex: none;
         }
+        .btn{
+            min-width: 70px;
+        }
     </style>
 
 </head>
@@ -34,11 +37,14 @@
                             <div class="col-md-6">
                                 <input type="text" id="url" value="http://192.168.88.150/api/config" class="form-control form-control-md" placeholder="esp8266 api url">
                             </div>
-                            <div class="col-auto">
-                                <a href="#" onclick="sendConfig();" class="btn btn-primary">Post Config</a>
+                            <div class="col-md-2">
+                                <a href="#" onclick="sendConfig();" class="btn btn-primary">Post</a>
                             </div>
-                            <div class="col-auto">
-                                <a href="#" onclick="getConfig();" class="btn">Get Config</a>
+                            <div class="col-md-2">
+                                <a href="#" onclick="getConfig();" class="btn btn-primary">Get</a>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="#" onclick="exportConfig();" class="btn btn-primary">Export</a>
                             </div>
 
                         </div>
@@ -108,10 +114,10 @@
         $.ajax({
             url: url,
             type: "GET",
-            crossDomain:true,
+            crossDomain: true,
             success: function (json) {
                 console.log("got config:\n" + json);
-                var data = JSON.parse(json);                
+                var data = JSON.parse(json);
                 showConfig(data);
             },
             error: function (e) {
@@ -122,18 +128,23 @@
 
     function showConfig(data) {
         for (var p in data) {
-            $("input[name='" + p + "']").val(data[p]);            
+            $("input[name='" + p + "']").val(data[p]);
         }
-        for(var i=0;i<data.seqCnt;i++){
+        for (var i = 0; i < data.seqCnt; i++) {
             var hex = data.seq[i].toString(16);
-            hex = ('000000'+hex).substring(hex.length);
-            $("#color_"+i).val("#"+hex);
+            hex = ('000000' + hex).substring(hex.length);
+            $("#color_" + i).val("#" + hex);
         }
     }
 
-    function sendConfig() {
-        var url = $("#url").val();
+    function exportConfig(){
+        var data = getConfigObject();
+        var json = JSON.stringify(data);
+        console.log("export config\n"+json);
+        download(json, "config.json", "json");
+    }
 
+    function getConfigObject(){
         var data = objectifyForm($("form").serializeArray());
         data.seq = [];
         if (data.seqCnt) {
@@ -141,11 +152,18 @@
                 data.seq[i] = parseInt($("#color_" + i).val().replace("#", "0x"));
             }
         };
+        return data;
+    }
+
+    function sendConfig() {
+        var url = $("#url").val();
+
+        var data = getConfigObject();
         console.log("data:\n" + JSON.stringify(data));
         $.ajax({
             url: url,
             type: "POST",
-            crossDomain:true,
+            crossDomain: true,
             dataType: "application/json",
             data: data,
             success: function (res) {
@@ -173,6 +191,19 @@
         return returnArray;
     };
 
+    function download(data, filename, type) {
+        var file = new Blob([data], { type: type });
 
+        var a = document.createElement("a"),
+            url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
+    }
 
 </script>
