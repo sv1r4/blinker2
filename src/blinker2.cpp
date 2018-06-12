@@ -232,13 +232,39 @@ void Blinker2::setDelta(int delta)
 
 void Blinker2::setSeqColor(int index, int color)
 {
-   if (index >= _seqCnt || index < 0)
+    if (index >= _seqCnt || index < 0)
     {
-        Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt-1));
+        Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
         return;
-    }    
+    }
     _seq[index] = color;
     Serial.printf("set _seq[%d]= %#08x\n", index, _seq[index]);
+}
+
+int Blinker2::getSeqCnt()
+{
+    return _seqCnt;
+}
+int Blinker2::getFadeDelay()
+{
+    return _fadeDelay;
+}
+int Blinker2::getColorDelay()
+{
+    return _colorDelay;
+}
+int Blinker2::getDelta()
+{
+    return _delta;
+}
+int Blinker2::getSeqColor(int index)
+{
+    if (index >= _seqCnt || index < 0)
+    {
+        Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
+        return 0;
+    }
+    return _seq[index];
 }
 
 #pragma region util methods

@@ -74,6 +74,11 @@ class Blinker2
         void setColorDelay(int colorDelay);
         void setDelta(int delta);
         void setSeqColor(int index, int color);
+        int getSeqCnt();
+        int getFadeDelay();
+        int getColorDelay();
+        int getDelta();
+        int getSeqColor(int index);
 
 };
 

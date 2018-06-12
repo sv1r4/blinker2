@@ -8,7 +8,7 @@
 #define LED 13
 #define NUMPIXELS 1
 
-ESP8266WebServer http(8028);
+ESP8266WebServer http(80);
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LED, NEO_GRB + NEO_KHZ800);
 Blinker2 blinker(pixels);
 bool wasConnected;
@@ -17,7 +17,6 @@ void initOta()
 {
 
     ArduinoOTA.onStart([]() {
-        blinker.setMode(M_OTA);
         String type;
         if (ArduinoOTA.getCommand() == U_FLASH)
             type = "sketch";
@@ -31,7 +30,6 @@ void initOta()
         Serial.println("end");
     });
     ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-        blinker.loop();
         Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
     });
     ArduinoOTA.onError([](ota_error_t error) {
@@ -52,25 +50,56 @@ void initOta()
 
 void onConfig()
 {
-    DynamicJsonBuffer jsonBuffer(4096);
-    String body = http.arg(F("plain"));
-    Serial.println("got common config" + body);
-
-    JsonObject &root = jsonBuffer.parseObject(body);
-    if (!root.success())
+    if (http.method() == HTTP_POST)
     {
-        Serial.println(F("parseObject() failed"));
-        http.send(400, "text/plain", "Parse JSON Failed");
-        return;
+        DynamicJsonBuffer jsonBuffer(4096);
+        String body = http.arg(F("plain"));
+        Serial.println("got common config" + body);
+
+        JsonObject &root = jsonBuffer.parseObject(body);
+        if (!root.success())
+        {
+            Serial.println(F("parseObject() failed"));
+            http.send(400, "text/plain", "Parse JSON Failed");
+            return;
+        }
+
+        int seqCnt = root["seqCnt"];
+        blinker.setSeqCnt(seqCnt);
+        blinker.setFadeDelay(root["fadeDelay"]);
+        blinker.setColorDelay(root["colorDelay"]);
+        blinker.setDelta(root["delta"]);
+        for (int i = 0; i < seqCnt; i++)
+        {
+            blinker.setSeqColor(i, root["seq"][i]);
+        }
+        http.send(200, "text/plain", "got config");
     }
-    
-    int seqCnt = root["seqCnt"];
-    blinker.setSeqCnt(seqCnt);
-    blinker.setFadeDelay(root["fadeDelay"]);
-    blinker.setColorDelay(root["colorDelay"]);
-    blinker.setDelta(root["delta"]);
-    for(int i=0;i<seqCnt;i++){
-        blinker.setSeqColor(i, root["seq"][i]);
+    else if (http.method() == HTTP_GET)
+    {
+        String json = "{";
+        int seqCnt = blinker.getSeqCnt();
+        json.concat("\"seqCnt\":");
+        json.concat(seqCnt);
+        json.concat(",\"fadeDelay\":");
+        json.concat(blinker.getFadeDelay());
+        json.concat(",\"colorDelay\":");
+        json.concat(blinker.getColorDelay());
+        json.concat(",\"delta\":");
+        json.concat(blinker.getDelta());
+        json.concat(",\"seq\":[");
+        for (int i = 0; i < seqCnt; i++)
+        {
+            json.concat(blinker.getSeqColor(i));
+        }
+        json.concat("]}");
+        Serial.println("Get config");
+        Serial.println(json);
+        http.send(200, "application/json", json);
+    }
+    else
+    {
+        http.send(400, "text/plain", "bad http method");
     }
 }
 
@@ -92,16 +121,25 @@ void onColorConfig()
 void setup()
 {
     Serial.begin(115200);
-    blinker.start();
-    http.begin();
-
-    initOta();
+    delay(1000);
     String apSsidStr = "blinker2.demo-" + String(ESP.getChipId(), HEX);
+
+    WiFi.persistent(false);
+    WiFi.setAutoReconnect(true);
+    WiFi.softAPdisconnect();
+    if (WiFi.isConnected())
+    {
+        WiFi.disconnect();
+    };
     WiFi.mode(WIFI_AP_STA);
     WiFi.begin(SSID, PASSWORD);
     WiFi.softAP(apSsidStr.c_str());
 
-    http.on("/api/config", HTTP_POST, onConfig);
+    http.stop();
+    http.on("/api/config", onConfig);
+    http.begin();
+    blinker.start();
+    initOta();
 }
 
 void loop()
@@ -109,10 +147,13 @@ void loop()
     if (!wasConnected && WiFi.status() == WL_CONNECTED)
     {
         wasConnected = true;
-        Serial.printf("Connected ip:%s",
+        Serial.printf("Connected ip:%s\n",
                       WiFi.localIP().toString().c_str());
+        http.stop();
+        http.on("/api/config", onConfig);
+        http.begin();
     }
-    else
+    else if (wasConnected && WiFi.status() != WL_CONNECTED)
     {
         wasConnected = false;
     }
