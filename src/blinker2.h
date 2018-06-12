@@ -64,9 +64,16 @@ class Blinker2
         Blinker2(Adafruit_NeoPixel &pixels);
         void start();
         void loop();
+        //set predefined modes
         void setMode(Mode mode);
         void setDataMode(DataMode dataMode);
         void setData(uint32_t data);
+        //custom seq config (loop fade color sequense)
+        void setSeqCnt(int seqCnt);
+        void setFadeDelay(int fadeDelay);
+        void setColorDelay(int colorDelay);
+        void setDelta(int delta);
+        void setSeqColor(int index, int color);
 
 };
 
