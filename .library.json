@@ -1,0 +1,37 @@
+{
+    "description": "Arduino/Esp8266 RGB Led Effects Librray", 
+    "repository": {
+        "url": "https://github.com/sv1r4/blinker2", 
+        "type": "git"
+    }, 
+    "platforms": [
+        "espressif8266"
+    ], 
+    "export": {
+        "exclude": [
+            "extras", 
+            "docs", 
+            "tests", 
+            "test"
+        ], 
+        "include": null
+    }, 
+    "authors": [
+        {
+            "maintainer": true, 
+            "name": "Yury Svirko", 
+            "url": "https://github.com/sv1r4/", 
+            "email": null
+        }
+    ], 
+    "keywords": [
+        "RGB",
+        "LED"
+    ], 
+    "name": "Blinker2", 
+    "frameworks": [
+        "arduino"
+    ], 
+    "version": "0.0.1", 
+    "homepage": "https://github.com/sv1r4/blinker2"
+}
