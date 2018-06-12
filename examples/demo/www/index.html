@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Demo Blinker2</title>
+    <!-- <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" /> -->
+    <meta name="viewport" content="width=device-width" />
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+
+    <style>
+        input.color-input,
+        .input-group-sm>.form-control.color-input {
+            -webkit-appearance: none;
+            padding: 0;
+            /* border: none; */
+            width: 30px;
+            height: 30px;
+            flex: none;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="page-header">Blink2 Demo</h4>
+                    <form role="form">
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                <input type="text" id="url" value="http://192.168.88.150/api/config" class="form-control form-control-md" placeholder="esp8266 api url">
+                            </div>
+                            <div class="col-auto">
+                                <a href="#" onclick="sendConfig();" class="btn btn-primary">Post Config</a>
+                            </div>
+
+                        </div>
+                        <div class="form-group">
+                            <label for="">fadeDelay (ms)</label>
+                            <input type="number" value="15" name="fadeDelay" class="form-control form-control-sm" placeholder="fadeDelay">
+                        </div>
+                        <div class="form-group">
+                            <label for="">colorDelay (ms)</label>
+                            <input type="number" value="100" name="colorDelay" class="form-control form-control-sm" placeholder="colorDelay">
+                        </div>
+                        <div class="form-group">
+                            <label for="">delta (1..255)</label>
+                            <input type="number" value="5" name="delta" class="form-control form-control-sm" placeholder="delta">
+                        </div>
+                        <div class="form-group">
+                            <label for="">seqCnt</label>
+                            <input type="number" value="12" name="seqCnt" class="form-control form-control-sm" placeholder="seqCnt">
+                        </div>
+                    </form>
+            </div>
+        </div>
+
+
+        <div class="row form-group colors">
+            <div class="col-sm-1">
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">0</div>
+                    </div>
+                    <input type="color" class="form-control color-input">
+                </div>
+            </div>
+        </div>
+</body>
+
+</html>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+
+<script>
+    $(function () {
+        $("div.colors").html("");
+        for (var i = 0; i < 64; i++) {
+            $("div.colors").append(
+                '<div class="col-sm-1">'
+                + '                   <div class="input-group input-group-sm">'
+                + '                       <div class="input-group-prepend">'
+                + '                          <div class="input-group-text color">' + ('00' + i.toString()).substring(i.toString().length) + '</div>'
+                + '                       </div>'
+                + '                       <input type="color" id="color_' + i + '" class="form-control color-input">'
+                + '                   </div>'
+                + '              </div>');
+        }
+
+    });
+
+    function sendConfig() {
+        var url = $("#url").val();
+        
+        var data = objectifyForm($("form").serializeArray());
+        data.color = [];
+        if (data.seqCnt) {
+            for (var i = 0; i < data.seqCnt; i++) {
+                data.color[i] = parseInt($("#color_" + i).val().replace("#", "0x"));
+            }
+        };
+        console.log("data:\n" + JSON.stringify(data));
+        $.ajax({
+            url: url,
+            type: "POST",
+            dataType: "application/json",
+            data: data,
+            success: function (res) {
+                console.log("success");
+            },
+            error: function (e) {
+                console.error("error post config\n"+ e.statusText);
+            }
+        });
+    };
+
+    function objectifyForm(formArray) {
+
+        var returnArray = {};
+        for (var i = 0; i < formArray.length; i++) {
+            var val = formArray[i]['value'];
+            if (!isNaN(val)) {
+                val = parseInt(val);
+            }
+            if(val===""){
+                val = null;
+            }
+            returnArray[formArray[i]['name']] = val;
+        }
+        return returnArray;
+    };
+
+
+
+</script>

@@ -195,6 +195,7 @@ void Blinker2::setSeqCnt(int seqCnt)
         return;
     }
     _seqCnt = seqCnt;
+    Serial.printf("set _seqCnt = %d\n", _seqCnt);
 }
 void Blinker2::setFadeDelay(int fadeDelay)
 {
@@ -204,6 +205,7 @@ void Blinker2::setFadeDelay(int fadeDelay)
         return;
     }
     _fadeDelay = fadeDelay;
+    Serial.printf("set _fadeDelay = %d\n", _fadeDelay);
 }
 
 void Blinker2::setColorDelay(int colorDelay)
@@ -214,6 +216,7 @@ void Blinker2::setColorDelay(int colorDelay)
         return;
     }
     _colorDelay = colorDelay;
+    Serial.printf("set _colorDelay = %d\n", _colorDelay);
 }
 
 void Blinker2::setDelta(int delta)
@@ -224,6 +227,7 @@ void Blinker2::setDelta(int delta)
         return;
     }
     _delta = delta;
+    Serial.printf("set _delta = %d\n", _delta);
 }
 
 void Blinker2::setSeqColor(int index, int color)
@@ -232,8 +236,9 @@ void Blinker2::setSeqColor(int index, int color)
     {
         Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt-1));
         return;
-    }
+    }    
     _seq[index] = color;
+    Serial.printf("set _seq[%d]= %#08x\n", index, _seq[index]);
 }
 
 #pragma region util methods
