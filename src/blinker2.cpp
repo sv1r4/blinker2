@@ -179,10 +179,10 @@ void Blinker2::loop()
             }
         }
 
-        _pixels.setPixelColor(0, //todo support multiple leds
-                              (uint8_t)_r,
-                              (uint8_t)_g,
-                              (uint8_t)_b);
+        for (int i = 0; i < NUMPIXELS; i++)
+        {
+            _pixels.setPixelColor(i, (uint8_t)_r, (uint8_t)_g, (uint8_t)_b);
+        }
         _pixels.show();
     }
 }

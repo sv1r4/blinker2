@@ -1,3 +1,6 @@
+#define LED 13
+#define NUMPIXELS 3
+
 #include "blinker2.h"
 #include <ESP8266WebServer.h>
 #include <ArduinoJson.h>
@@ -5,9 +8,6 @@
 
 #define SSID "balloon"
 #define PASSWORD "balL00n17988028"
-#define LED 13
-#define NUMPIXELS 1
-
 ESP8266WebServer http(80);
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LED, NEO_GRB + NEO_KHZ800);
 Blinker2 blinker(pixels);
@@ -164,11 +164,11 @@ void setup()
     http.on("/api/config", onConfig);
     http.begin();
     blinker.start();
-    //initOta();
 }
 
 void loop()
 {
+    ArduinoOTA.handle();
     if (!wasConnected && WiFi.status() == WL_CONNECTED)
     {
         wasConnected = true;
@@ -186,5 +186,4 @@ void loop()
 
     blinker.loop();
     http.handleClient();
-    ArduinoOTA.handle();
 }
