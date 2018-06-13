@@ -1,6 +1,8 @@
 #include "blinker2.h"
 
-Blinker2::Blinker2(Adafruit_NeoPixel &pixels) : _pixels(pixels)
+Blinker2::Blinker2(Adafruit_NeoPixel &pixels) : 
+_pixels(pixels),
+_pixelsCnt(pixels.numPixels())
 {
 }
 
@@ -180,7 +182,7 @@ void Blinker2::loop()
             return;
         }
 
-        for (uint16_t i = 0; i < _pixels.numPixels(); i++)
+        for (uint16_t i = 0; i < _pixelsCnt; i++)
         {
             _pixels.setPixelColor(i, (uint8_t)_r, (uint8_t)_g, (uint8_t)_b);
         }

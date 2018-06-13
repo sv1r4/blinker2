@@ -38,6 +38,7 @@ enum DataMode{
 class Blinker2
 {
     private:
+        uint16_t _pixelsCnt;
         Adafruit_NeoPixel &_pixels;
         Mode _mode = Mode::M_DATA;
         DataMode _dataMode = DataMode::DM_ON;
