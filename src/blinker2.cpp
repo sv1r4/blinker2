@@ -180,7 +180,7 @@ void Blinker2::loop()
             return;
         }
 
-        for (int i = 0; i < NUMPIXELS; i++)
+        for (uint16_t i = 0; i < _pixels.numPixels(); i++)
         {
             _pixels.setPixelColor(i, (uint8_t)_r, (uint8_t)_g, (uint8_t)_b);
         }

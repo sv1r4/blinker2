@@ -18,12 +18,6 @@ uint32_t gradient[64] = {0x00FF00,0x04FA00,0x08F600,0x0CF200,0x10EE00,0x14EA00,0
 */
 #define GRADIENT_SIZE 64
 #define SEQ_SIZE  64
-#ifndef NUMPIXELS
-#define NUMPIXELS 3
-#endif
-#ifndef LED
-#define LED 13
-#endif
 
 enum Mode
 {
@@ -44,7 +38,7 @@ enum DataMode{
 class Blinker2
 {
     private:
-        Adafruit_NeoPixel _pixels;
+        Adafruit_NeoPixel &_pixels;
         Mode _mode = Mode::M_DATA;
         DataMode _dataMode = DataMode::DM_ON;
         uint32_t _fadeDelay = 5;//ms
