@@ -177,6 +177,7 @@ void Blinker2::loop()
                     _tLastColor = _now;
                 }
             }
+            return;
         }
 
         for (int i = 0; i < NUMPIXELS; i++)
