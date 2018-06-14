@@ -87,12 +87,11 @@ void onConfig()
 
         int seqCnt = root["seqCnt"];
         blinker.setSeqCnt(seqCnt);
-        blinker.setFadeDelay(root["fadeDelay"]);
         blinker.setColorDelay(root["colorDelay"]);
         blinker.setDelta(root["delta"]);
         for (int i = 0; i < seqCnt; i++)
         {
-            blinker.setSeqColor(i, root["seq"][i]);
+            blinker.setSeqColor(i, root["seq"][i], root["speed"][i]);
         }
 
         http.send(200, "text/plain", "got config");
@@ -103,12 +102,11 @@ void onConfig()
         int seqCnt = blinker.getSeqCnt();
         json.concat("\"seqCnt\":");
         json.concat(seqCnt);
-        json.concat(",\"fadeDelay\":");
-        json.concat(blinker.getFadeDelay());
         json.concat(",\"colorDelay\":");
         json.concat(blinker.getColorDelay());
         json.concat(",\"delta\":");
         json.concat(blinker.getDelta());
+        
         json.concat(",\"seq\":[");
         for (int i = 0; i < seqCnt - 1; i++)
         {
@@ -116,7 +114,18 @@ void onConfig()
             json.concat(",");
         }
         json.concat(blinker.getSeqColor(seqCnt - 1));
-        json.concat("]}");
+        json.concat("]");
+
+        json.concat(",\"speed\":[");
+        for (int i = 0; i < seqCnt - 1; i++)
+        {
+            json.concat(blinker.getSpeedColor(i));
+            json.concat(",");
+        }
+        json.concat(blinker.getSpeedColor(seqCnt - 1));
+        json.concat("]");
+        json.concat("}");
+
         Serial.println("Get config");
         Serial.println(json);
         http.send(200, "application/json", json);

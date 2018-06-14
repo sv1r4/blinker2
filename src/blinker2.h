@@ -37,12 +37,13 @@ enum DataMode{
 
 class Blinker2
 {
-    private:
+    private:       
         uint16_t _pixelsCnt;
         Adafruit_NeoPixel &_pixels;
         Mode _mode = Mode::M_DATA;
         DataMode _dataMode = DataMode::DM_ON;
-        uint32_t _fadeDelay = 5;//ms
+        uint32_t _speed[SEQ_SIZE];//array of ms
+        uint32_t _speedCur = 1;
         uint32_t _colorDelay = 0;//ms
         uint32_t _delta = 10;
         uint32_t _seq[SEQ_SIZE];//array of colors
@@ -70,16 +71,15 @@ class Blinker2
         void setDataMode(DataMode dataMode);
         void setData(uint32_t data);
         //custom seq config (loop fade color sequense)
-        void setSeqCnt(int seqCnt);
-        void setFadeDelay(int fadeDelay);
+        void setSeqCnt(int seqCnt);        
         void setColorDelay(int colorDelay);
         void setDelta(int delta);
-        void setSeqColor(int index, int color);
+        void setSeqColor(uint16_t index, int color, uint32_t speed);
         int getSeqCnt();
-        int getFadeDelay();
         int getColorDelay();
         int getDelta();
-        int getSeqColor(int index);
+        int getSeqColor(uint16_t index);
+        uint32_t getSpeedColor(uint16_t index);
 
 };
 

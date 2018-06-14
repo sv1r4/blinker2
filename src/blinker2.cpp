@@ -1,9 +1,11 @@
 #include "blinker2.h"
 
-Blinker2::Blinker2(Adafruit_NeoPixel &pixels) : 
-_pixels(pixels),
-_pixelsCnt(pixels.numPixels())
+Blinker2::Blinker2(Adafruit_NeoPixel &pixels) : _pixels(pixels),
+                                                _pixelsCnt(pixels.numPixels())
 {
+    for(uint16_t i = 0;i<SEQ_SIZE;i++){
+        _speed[i] = 10;
+    }
 }
 
 void Blinker2::start()
@@ -72,13 +74,17 @@ void Blinker2::setMode(Mode mode, DataMode dataMode, uint32_t data)
         case DM_ON:
             _seq[0] = dataColor;
             _seqCnt = 1;
-            _fadeDelay = 10;
+            for(int i = 0;i<_seqCnt;i++){
+                _speed[i]= 10;
+            }
             _colorDelay = 10000;
             break;
         case DM_OFF:
             _seq[0] = 0x000000;
             _seqCnt = 1;
-            _fadeDelay = 10;
+            for(uint32_t i = 0;i<_seqCnt;i++){
+                _speed[i]= 10;
+            }
             _colorDelay = 10000;
             break;
         case DM_FADEOUT:
@@ -91,7 +97,9 @@ void Blinker2::setMode(Mode mode, DataMode dataMode, uint32_t data)
                 _seq[i] = dataColor;
             }
             _seqCnt = SEQ_SIZE;
-            _fadeDelay = 3;
+            for(uint32_t i = 0;i<_seqCnt;i++){
+                _speed[i]= 3;
+            }
             _delta = 2;
             _colorDelay = 100;
             break;
@@ -105,7 +113,9 @@ void Blinker2::setMode(Mode mode, DataMode dataMode, uint32_t data)
                 _seq[i] = 0x000000;
             }
             _seqCnt = SEQ_SIZE;
-            _fadeDelay = 10;
+            for(uint32_t i = 0;i<_seqCnt;i++){
+                _speed[i]= 10;
+            }
             _delta = 2;
             _colorDelay = 100;
             break;
@@ -119,7 +129,9 @@ void Blinker2::setMode(Mode mode, DataMode dataMode, uint32_t data)
         _seq[1] = 0x000000;
         _seq[2] = 0x000000;
         _seq[3] = 0x000000;
-        _fadeDelay = 3;
+        for(uint32_t i = 0;i<_seqCnt;i++){
+                _speed[i]= 3;
+            }
         _colorDelay = 50;
         _delta = 15;
         break;
@@ -129,7 +141,9 @@ void Blinker2::setMode(Mode mode, DataMode dataMode, uint32_t data)
         _seq[1] = 0x000000;
         _seq[2] = 0x000000;
         _seq[3] = 0x000000;
-        _fadeDelay = 3;
+        for(uint32_t i = 0;i<_seqCnt;i++){
+                _speed[i]= 3;
+            }
         _colorDelay = 50;
         _delta = 15;
         break;
@@ -138,7 +152,9 @@ void Blinker2::setMode(Mode mode, DataMode dataMode, uint32_t data)
         _seq[0] = 0xFF0000;
         _seq[1] = 0x0000FF;
         _seq[2] = 0x00FF00;
-        _fadeDelay = 3;
+        for(uint32_t i = 0;i<_seqCnt;i++){
+                _speed[i]= 3;
+            }
         _delta = 20;
         _colorDelay = 0;
         break;
@@ -152,13 +168,14 @@ void Blinker2::loop()
     _now = millis();
 
     //check time for fade
-    if (_now - _tLastFade >= _fadeDelay)
+    if (_now - _tLastFade >= _speed[_seqIndex])
     {
         _tLastFade = _now;
         //get target color
         auto r = getC(_seq[_seqIndex], 0);
         auto g = getC(_seq[_seqIndex], 1);
         auto b = getC(_seq[_seqIndex], 2);
+        bool wasOk = _r == r && _b == b && _g == g;
 
         _r = moveToTarget(_r, r);
         _g = moveToTarget(_g, g);
@@ -179,7 +196,10 @@ void Blinker2::loop()
                     _tLastColor = _now;
                 }
             }
-            return;
+            if (wasOk)
+            {
+                return;
+            }
         }
 
         for (uint16_t i = 0; i < _pixelsCnt; i++)
@@ -200,16 +220,7 @@ void Blinker2::setSeqCnt(int seqCnt)
     _seqCnt = seqCnt;
     Serial.printf("set _seqCnt = %d\n", _seqCnt);
 }
-void Blinker2::setFadeDelay(int fadeDelay)
-{
-    if (fadeDelay < 0)
-    {
-        Serial.printf("fadeDealy=%d is out of range [0, maxint]\n", fadeDelay);
-        return;
-    }
-    _fadeDelay = fadeDelay;
-    Serial.printf("set _fadeDelay = %d\n", _fadeDelay);
-}
+
 
 void Blinker2::setColorDelay(int colorDelay)
 {
@@ -233,7 +244,7 @@ void Blinker2::setDelta(int delta)
     Serial.printf("set _delta = %d\n", _delta);
 }
 
-void Blinker2::setSeqColor(int index, int color)
+void Blinker2::setSeqColor(uint16_t index, int color, uint32_t speed)
 {
     if (index >= _seqCnt || index < 0)
     {
@@ -241,16 +252,13 @@ void Blinker2::setSeqColor(int index, int color)
         return;
     }
     _seq[index] = color;
+    _speed[index] = speed;
     Serial.printf("set _seq[%d]= %#08x\n", index, _seq[index]);
 }
 
 int Blinker2::getSeqCnt()
 {
     return _seqCnt;
-}
-int Blinker2::getFadeDelay()
-{
-    return _fadeDelay;
 }
 int Blinker2::getColorDelay()
 {
@@ -260,7 +268,7 @@ int Blinker2::getDelta()
 {
     return _delta;
 }
-int Blinker2::getSeqColor(int index)
+int Blinker2::getSeqColor(uint16_t index)
 {
     if (index >= _seqCnt || index < 0)
     {
@@ -268,6 +276,16 @@ int Blinker2::getSeqColor(int index)
         return 0;
     }
     return _seq[index];
+}
+
+uint32_t Blinker2::getSpeedColor(uint16_t index)
+{
+    if (index >= _seqCnt || index < 0)
+    {
+        Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
+        return 0;
+    }
+    return _speed[index];
 }
 
 #pragma region util methods

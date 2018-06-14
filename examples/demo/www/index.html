@@ -90,15 +90,18 @@
     crossorigin="anonymous"></script>
 
 <script>
+    var SEQ_SIZE = 64;
+
     $(function () {
         $("div.colors").html("");
-        for (var i = 0; i < 64; i++) {
+        for (var i = 0; i < SEQ_SIZE; i++) {
             $("div.colors").append(
-                '<div class="col-sm-1">'
+                '<div class="col-sm-2">'
                 + '                   <div class="input-group input-group-sm">'
                 + '                       <div class="input-group-prepend">'
                 + '                          <div class="input-group-text color">' + ('00' + i.toString()).substring(i.toString().length) + '</div>'
                 + '                       </div>'
+                + '                       <input type="number" id="speed_' + i + '" class="form-control speed-input" placeholder="speed ms">'
                 + '                       <input type="color" id="color_' + i + '" class="form-control color-input">'
                 + '                   </div>'
                 + '              </div>');
@@ -129,8 +132,10 @@
         }
         for (var i = 0; i < data.seqCnt; i++) {
             var hex = data.seq[i].toString(16);
+            var speed = data.speed[i];
             hex = ('000000' + hex).substring(hex.length);
             $("#color_" + i).val("#" + hex);
+            $("#speed_" + i).val(speed);
         }
     }
 
@@ -144,9 +149,14 @@
     function getConfigObject(){
         var data = objectifyForm($("form").serializeArray());
         data.seq = [];
+        data.speed = [];
         if (data.seqCnt) {
             for (var i = 0; i < data.seqCnt; i++) {
+                var speed = $("#speed_" + i).val();                
+                speed = ((!speed) || (isNaN(speed))) ? 1:parseInt(speed);
+                
                 data.seq[i] = parseInt($("#color_" + i).val().replace("#", "0x"));
+                data.speed[i] = speed;
             }
         };
         return data;
