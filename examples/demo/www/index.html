@@ -20,7 +20,8 @@
             height: 30px;
             flex: none;
         }
-        .btn{
+
+        .btn {
             min-width: 70px;
         }
     </style>
@@ -34,7 +35,7 @@
                 <h5 class="page-header">Blink2 Demo</h4>
                     <form role="form">
                         <div class="form-group row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <input type="text" id="url" value="http://192.168.88.150/api/config" class="form-control form-control-md" placeholder="esp8266 api url">
                             </div>
                             <div class="col-md-2">
@@ -46,7 +47,12 @@
                             <div class="col-md-2">
                                 <a href="#" onclick="exportConfig();" class="btn btn-primary">Export</a>
                             </div>
-
+                            <div class="col-md-2">
+                                <div class="custom-file">
+                                    <input type="file" onchange="importConfig(this);" style="display: none;" class="custom-file-input" id="customFile">
+                                    <label class="btn btn-primary " for="customFile">Import</label>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="">fadeDelay (ms)</label>
@@ -118,7 +124,7 @@
             crossDomain: true,
             success: function (data) {
                 console.log("got config:\n" + JSON.stringify(data));
-                showConfig(data);
+                restoreConfig(data, 10);
             },
             error: function (e) {
                 console.error("error get config\n" + e.statusText);
@@ -126,36 +132,68 @@
         });
     }
 
-    function showConfig(data) {
+    function restoreConfig(data, format) {
         for (var p in data) {
             $("input[name='" + p + "']").val(data[p]);
         }
         for (var i = 0; i < data.seqCnt; i++) {
-            var hex = data.seq[i].toString(16);
+            var hex = "0x000000";
+            if (format === 10) {
+                hex = data.seq[i].toString(16);
+                hex = "#" + ('000000' + hex).substring(hex.length);
+            } else if (format === 16) {
+                hex = data.seq[i].replace("0x", "#")
+            } else {
+                console.error("unsupported format should be 10 or 16");
+            }            
             var speed = data.speed[i];
-            hex = ('000000' + hex).substring(hex.length);
-            $("#color_" + i).val("#" + hex);
+            $("#color_" + i).val(hex);
             $("#speed_" + i).val(speed);
         }
     }
 
-    function exportConfig(){
-        var data = getConfigObject();
+    function exportConfig() {
+        var data = getConfigObject(16);
         var json = JSON.stringify(data);
-        console.log("export config\n"+json);
+        console.log("export config\n" + json);
         download(json, "config.json", "json");
     }
 
-    function getConfigObject(){
+    function importConfig(finput) {        
+        var file = finput.files[0];
+        if (!file) {
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var json = e.target.result;
+            var data = JSON.parse(json);
+            restoreConfig(data, 16);
+            $(finput).val("");
+
+        };
+        reader.readAsText(file);
+    }
+
+
+    function getConfigObject(format) {
         var data = objectifyForm($("form").serializeArray());
         data.seq = [];
         data.speed = [];
         if (data.seqCnt) {
             for (var i = 0; i < data.seqCnt; i++) {
-                var speed = $("#speed_" + i).val();                
-                speed = ((!speed) || (isNaN(speed))) ? 1:parseInt(speed);
-                
-                data.seq[i] = parseInt($("#color_" + i).val().replace("#", "0x"));
+                var speed = $("#speed_" + i).val();
+                speed = ((!speed) || (isNaN(speed))) ? 1 : parseInt(speed);
+                var hex = $("#color_" + i).val().replace("#", "0x");
+                if (format === 10) {
+                    data.seq[i] = parseInt(hex);
+                } else if (format === 16) {
+                    data.seq[i] = hex;
+                } else {
+                    console.error("unsupported format should be 10 or 16");
+                }
+
+
                 data.speed[i] = speed;
             }
         };
@@ -165,8 +203,8 @@
     function sendConfig() {
         var url = $("#url").val();
 
-        var data = getConfigObject();
-        var json= JSON.stringify(data);
+        var data = getConfigObject(10);
+        var json = JSON.stringify(data);
         console.log("data:\n" + json);
         $.ajax({
             url: url,
