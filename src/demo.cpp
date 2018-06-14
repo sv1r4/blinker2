@@ -71,7 +71,7 @@ void onConfig()
         http.sendHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type");
         http.send(200);
     }
-    else if (http.method() == HTTP_POST )
+    else if (http.method() == HTTP_POST)
     {
         DynamicJsonBuffer jsonBuffer(4096);
         String body = http.arg(F("plain"));
@@ -106,7 +106,7 @@ void onConfig()
         json.concat(blinker.getColorDelay());
         json.concat(",\"delta\":");
         json.concat(blinker.getDelta());
-        
+
         json.concat(",\"seq\":[");
         for (int i = 0; i < seqCnt - 1; i++)
         {
@@ -164,9 +164,9 @@ void setup()
     {
         WiFi.disconnect();
     };
-    WiFi.mode(WIFI_AP_STA);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(SSID, PASSWORD);
-    WiFi.softAP(apSsidStr.c_str());
+    //   WiFi.softAP(apSsidStr.c_str());
 
     http.stop();
     http.on("/api/config", onConfig);
@@ -176,16 +176,16 @@ void setup()
 
 void loop()
 {
-    ArduinoOTA.handle();
     if (!wasConnected && WiFi.status() == WL_CONNECTED)
     {
+        delay(1000);
+        initOta();
         wasConnected = true;
         Serial.printf("Connected ip:%s\n",
                       WiFi.localIP().toString().c_str());
         http.stop();
         http.on("/api/config", onConfig);
         http.begin();
-        initOta();
     }
     else if (wasConnected && WiFi.status() != WL_CONNECTED)
     {
@@ -194,4 +194,5 @@ void loop()
 
     blinker.loop();
     http.handleClient();
+    ArduinoOTA.handle();
 }
