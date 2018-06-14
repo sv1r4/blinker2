@@ -119,7 +119,7 @@
             type: "GET",
             crossDomain: true,
             success: function (data) {
-                console.log("got config:\n" + JSON.stringify(data));
+                console.log("got config:\n" + JSON.stringify(data, null, "\t"));
                 restoreConfig(data, 10);
             },
             error: function (e) {
@@ -150,7 +150,7 @@
 
     function exportConfig() {
         var data = getConfigObject(16);
-        var json = JSON.stringify(data);
+        var json = JSON.stringify(data, null, "\t");
         console.log("export config\n" + json);
         download(json, "config.json", "json");
     }
@@ -200,7 +200,7 @@
         var url = $("#url").val();
 
         var data = getConfigObject(10);
-        var json = JSON.stringify(data);
+        var json = JSON.stringify(data, null, "\t");
         console.log("data:\n" + json);
         $.ajax({
             url: url,
