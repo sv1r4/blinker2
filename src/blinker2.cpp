@@ -288,6 +288,15 @@ uint32_t Blinker2::getSpeedColor(uint16_t index)
     return _speed[index];
 }
 
+void Blinker2::setSeqIndex(uint32_t index){
+    if (index >= _seqCnt || index < 0)
+    {
+        Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
+        return;
+    }
+    _seqIndex = index;
+}
+
 #pragma region util methods
 
 uint32_t Blinker2::getC(uint32_t color, byte i)

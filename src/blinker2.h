@@ -80,6 +80,7 @@ class Blinker2
         int getDelta();
         int getSeqColor(uint16_t index);
         uint32_t getSpeedColor(uint16_t index);
+        void setSeqIndex(uint32_t index);
 
 };
 
