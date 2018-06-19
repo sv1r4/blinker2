@@ -106,7 +106,7 @@ void Blinker2::setSeqColor(uint16_t index, int color, uint32_t speed)
    // Serial.printf("set _seq[%d]= %#08x\n", index, _seq[index]);
 }
 
-int Blinker2::getSeqCnt()
+uint32_t Blinker2::getSeqCnt()
 {
     return _seqCnt;
 }
@@ -147,6 +147,9 @@ void Blinker2::setSeqIndex(uint32_t index){
     _seqIndex = index;
 }
 
+uint32_t Blinker2::getSeqIndex(){
+    return _seqIndex;
+}
 #pragma region util methods
 
 uint32_t Blinker2::getC(uint32_t color, byte i)
