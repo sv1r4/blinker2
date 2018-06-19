@@ -68,7 +68,7 @@ void Blinker2::setSeqCnt(int seqCnt)
         return;
     }
     _seqCnt = seqCnt;
-    Serial.printf("set _seqCnt = %d\n", _seqCnt);
+    //Serial.printf("set _seqCnt = %d\n", _seqCnt);
 }
 
 
@@ -80,7 +80,7 @@ void Blinker2::setColorDelay(int colorDelay)
         return;
     }
     _colorDelay = colorDelay;
-    Serial.printf("set _colorDelay = %d\n", _colorDelay);
+    //Serial.printf("set _colorDelay = %d\n", _colorDelay);
 }
 
 void Blinker2::setDelta(int delta)
@@ -91,7 +91,7 @@ void Blinker2::setDelta(int delta)
         return;
     }
     _delta = delta;
-    Serial.printf("set _delta = %d\n", _delta);
+    //Serial.printf("set _delta = %d\n", _delta);
 }
 
 void Blinker2::setSeqColor(uint16_t index, int color, uint32_t speed)
@@ -103,7 +103,7 @@ void Blinker2::setSeqColor(uint16_t index, int color, uint32_t speed)
     }
     _seq[index] = color;
     _speed[index] = speed;
-    Serial.printf("set _seq[%d]= %#08x\n", index, _seq[index]);
+   // Serial.printf("set _seq[%d]= %#08x\n", index, _seq[index]);
 }
 
 int Blinker2::getSeqCnt()
