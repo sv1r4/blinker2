@@ -150,6 +150,11 @@ void Blinker2::setSeqIndex(uint32_t index){
 uint32_t Blinker2::getSeqIndex(){
     return _seqIndex;
 }
+
+void Blinker2::setMaxBrightness(uint8_t val){
+    Serial.printf("set Max Brightness to %i\n", val);
+    _pixels.setBrightness(val);
+}
 #pragma region util methods
 
 uint32_t Blinker2::getC(uint32_t color, byte i)
