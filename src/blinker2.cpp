@@ -154,6 +154,7 @@ uint32_t Blinker2::getSeqIndex(){
 void Blinker2::setMaxBrightness(uint8_t val){
     Serial.printf("set Max Brightness to %i\n", val);
     _pixels.setBrightness(val);
+    _pixels.show();
 }
 #pragma region util methods
 
