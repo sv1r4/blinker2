@@ -3,6 +3,19 @@
 Blinker2::Blinker2(Adafruit_NeoPixel &pixels) : _pixels(pixels),
                                                 _pixelsCnt(pixels.numPixels())
 {
+    init();
+}
+
+Blinker2::Blinker2(Adafruit_NeoPixel &pixels, uint8_t brightness) : _pixels(pixels),
+                                                _pixelsCnt(pixels.numPixels())
+{
+    init();
+    _targetBrightness = brightness;
+    pixels.setBrightness(brightness);
+}
+
+void Blinker2::init()
+{
     for (uint16_t i = 0; i < SEQ_SIZE; i++)
     {
         _speed[i] = 10;
@@ -58,7 +71,7 @@ void Blinker2::loop()
             _pixels.setPixelColor(i, (uint8_t)_r, (uint8_t)_g, (uint8_t)_b);
         }
 
-        #pragma region fade brightness
+#pragma region fade brightness
         uint8_t currentBrightness = _pixels.getBrightness();
         if (currentBrightness < _targetBrightness)
         {
@@ -68,7 +81,7 @@ void Blinker2::loop()
         {
             _pixels.setBrightness(--currentBrightness);
         }
-        #pragma endregion
+#pragma endregion
         _pixels.show();
     }
 }

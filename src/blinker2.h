@@ -29,8 +29,10 @@ class Blinker2
         uint32_t getC(uint32_t color, byte i);
         uint32_t moveToTarget(uint32_t c, uint32_t t);
         uint8_t _targetBrightness;
+        void init();
     public:    
         Blinker2(Adafruit_NeoPixel &pixels);
+        Blinker2(Adafruit_NeoPixel &pixels, uint8_t brightness);
         void start();
         void loop();        
         void setSeqCnt(int seqCnt);        
