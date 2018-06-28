@@ -3,7 +3,8 @@
 Blinker2::Blinker2(Adafruit_NeoPixel &pixels) : _pixels(pixels),
                                                 _pixelsCnt(pixels.numPixels())
 {
-    for(uint16_t i = 0;i<SEQ_SIZE;i++){
+    for (uint16_t i = 0; i < SEQ_SIZE; i++)
+    {
         _speed[i] = 10;
     }
 }
@@ -56,6 +57,18 @@ void Blinker2::loop()
         {
             _pixels.setPixelColor(i, (uint8_t)_r, (uint8_t)_g, (uint8_t)_b);
         }
+
+        #pragma region fade brightness
+        uint8_t currentBrightness = _pixels.getBrightness();
+        if (currentBrightness < _targetBrightness)
+        {
+            _pixels.setBrightness(++currentBrightness);
+        }
+        else if (currentBrightness > _targetBrightness)
+        {
+            _pixels.setBrightness(--currentBrightness);
+        }
+        #pragma endregion
         _pixels.show();
     }
 }
@@ -70,7 +83,6 @@ void Blinker2::setSeqCnt(int seqCnt)
     _seqCnt = seqCnt;
     //Serial.printf("set _seqCnt = %d\n", _seqCnt);
 }
-
 
 void Blinker2::setColorDelay(int colorDelay)
 {
@@ -103,7 +115,7 @@ void Blinker2::setSeqColor(uint16_t index, int color, uint32_t speed)
     }
     _seq[index] = color;
     _speed[index] = speed;
-   // Serial.printf("set _seq[%d]= %#08x\n", index, _seq[index]);
+    // Serial.printf("set _seq[%d]= %#08x\n", index, _seq[index]);
 }
 
 uint32_t Blinker2::getSeqCnt()
@@ -138,7 +150,8 @@ uint32_t Blinker2::getSpeedColor(uint16_t index)
     return _speed[index];
 }
 
-void Blinker2::setSeqIndex(uint32_t index){
+void Blinker2::setSeqIndex(uint32_t index)
+{
     if (index >= _seqCnt || index < 0)
     {
         Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
@@ -147,14 +160,15 @@ void Blinker2::setSeqIndex(uint32_t index){
     _seqIndex = index;
 }
 
-uint32_t Blinker2::getSeqIndex(){
+uint32_t Blinker2::getSeqIndex()
+{
     return _seqIndex;
 }
 
-void Blinker2::setMaxBrightness(uint8_t val){
-    Serial.printf("set Max Brightness to %i\n", val);
-    _pixels.setBrightness(val);
-    _pixels.show();
+void Blinker2::setMaxBrightness(uint8_t val)
+{
+    Serial.printf("set _targetBrightness= %i\n", val);
+    _targetBrightness = val;
 }
 #pragma region util methods
 
