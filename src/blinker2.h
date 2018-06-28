@@ -47,6 +47,7 @@ class Blinker2
         void setSeqIndex(uint32_t index);
         uint32_t getSeqIndex();
         void setMaxBrightness(uint8_t val);
+        void initBrightness(uint8_t val);
 
 };
 

@@ -183,6 +183,13 @@ void Blinker2::setMaxBrightness(uint8_t val)
     Serial.printf("set _targetBrightness= %i\n", val);
     _targetBrightness = val;
 }
+
+void Blinker2::initBrightness(uint8_t val){
+    Serial.printf("init brightness to %i\n", val);
+    _pixels.setBrightness(val);
+    _pixels.show();
+}
+
 #pragma region util methods
 
 uint32_t Blinker2::getC(uint32_t color, byte i)
