@@ -39,7 +39,8 @@ void Blinker2::loop()
         auto r = getC(_seq[_seqIndex], 0);
         auto g = getC(_seq[_seqIndex], 1);
         auto b = getC(_seq[_seqIndex], 2);
-        bool wasOk = _r == r && _b == b && _g == g;
+        uint8_t currentBrightness = _pixels.getBrightness();
+        bool wasOk = _r == r && _b == b && _g == g && currentBrightness == _targetBrightness;
 
         _r = moveToTarget(_r, r);
         _g = moveToTarget(_g, g);
@@ -72,7 +73,7 @@ void Blinker2::loop()
         }
 
 #pragma region fade brightness
-        uint8_t currentBrightness = _pixels.getBrightness();
+        
         if (currentBrightness < _targetBrightness)
         {
             _pixels.setBrightness(++currentBrightness);
