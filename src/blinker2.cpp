@@ -22,69 +22,74 @@ void Blinker2::init()
     }
 }
 
+
+
 void Blinker2::start()
 {
     _pixels.begin();
+    updateLoopTicker();
+}
+
+void Blinker2::updateLoopTicker(){
+    _tickerLoop.detach();
+    std::function<void(void)> fTickerLoop = std::bind(&Blinker2::loop, this);
+    _tickerLoop.attach_ms(_speed[_seqIndex], fTickerLoop);
 }
 
 void Blinker2::loop()
 {
     _now = millis();
 
-    //check time for fade
-    if (_now - _tLastFade >= _speed[_seqIndex])
-    {
-        _tLastFade = _now;
-        //get target color
-        auto r = getC(_seq[_seqIndex], 0);
-        auto g = getC(_seq[_seqIndex], 1);
-        auto b = getC(_seq[_seqIndex], 2);
-        uint8_t currentBrightness = _pixels.getBrightness();
-        bool wasOk = _r == r && _b == b && _g == g && currentBrightness == _targetBrightness;
+    //get target color
+    auto r = getC(_seq[_seqIndex], 0);
+    auto g = getC(_seq[_seqIndex], 1);
+    auto b = getC(_seq[_seqIndex], 2);
+    uint8_t currentBrightness = _pixels.getBrightness();
+    bool wasOk = _r == r && _b == b && _g == g && currentBrightness == _targetBrightness;
 
-        _r = moveToTarget(_r, r);
-        _g = moveToTarget(_g, g);
-        _b = moveToTarget(_b, b);
+    _r = moveToTarget(_r, r);
+    _g = moveToTarget(_g, g);
+    _b = moveToTarget(_b, b);
 
-        if (_r == r && _b == b && _g == g)
-        { //target achived
-            //check time for change color to next in sequnece
-            if (_now - _tLastColor >= _colorDelay)
-            {
-                _tLastColor = _now;
-                _seqIndex++;
-                // Serial.printf("change color to #%d\n", _seqIndex);
-                if (_seqIndex >= _seqCnt)
-                { //loop colors
-                    //Serial.println("reset sequence");
-                    _seqIndex = 0;
-                    _tLastColor = _now;
-                }
-            }
-            if (wasOk)
-            {
-                return;
-            }
-        }
-
-        for (uint16_t i = 0; i < _pixelsCnt; i++)
+    if (_r == r && _b == b && _g == g)
+    { //target achived
+        //check time for change color to next in sequnece
+        if (_now - _tLastColor >= _colorDelay)
         {
-            _pixels.setPixelColor(i, (uint8_t)_r, (uint8_t)_g, (uint8_t)_b);
+            _tLastColor = _now;
+            _seqIndex++;
+            updateLoopTicker();
+            // Serial.printf("change color to #%d\n", _seqIndex);
+            if (_seqIndex >= _seqCnt)
+            { //loop colors
+                //Serial.println("reset sequence");
+                _seqIndex = 0;
+                _tLastColor = _now;
+            }
         }
+        if (wasOk)
+        {
+            return;
+        }
+    }
+
+    for (uint16_t i = 0; i < _pixelsCnt; i++)
+    {
+        _pixels.setPixelColor(i, (uint8_t)_r, (uint8_t)_g, (uint8_t)_b);
+    }
 
 #pragma region fade brightness
-        
-        if (currentBrightness < _targetBrightness)
-        {
-            _pixels.setBrightness(++currentBrightness);
-        }
-        else if (currentBrightness > _targetBrightness)
-        {
-            _pixels.setBrightness(--currentBrightness);
-        }
-#pragma endregion
-        _pixels.show();
+    
+    if (currentBrightness < _targetBrightness)
+    {
+        _pixels.setBrightness(++currentBrightness);
     }
+    else if (currentBrightness > _targetBrightness)
+    {
+        _pixels.setBrightness(--currentBrightness);
+    }
+#pragma endregion
+    _pixels.show();
 }
 
 void Blinker2::setSeqCnt(int seqCnt)

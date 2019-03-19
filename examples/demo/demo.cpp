@@ -192,7 +192,6 @@ void loop()
         wasConnected = false;
     }
 
-    blinker.loop();
     http.handleClient();
     ArduinoOTA.handle();
 }

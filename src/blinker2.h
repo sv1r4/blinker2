@@ -2,7 +2,8 @@
 #define BLINKER2_H
 
 
-#include "Adafruit_NeoPixel.h"
+#include <Adafruit_NeoPixel.h>
+#include <Ticker.h>
 
 #define SEQ_SIZE  64
 
@@ -19,7 +20,6 @@ class Blinker2
         uint32_t _seqIndex = 0;//current color
         uint32_t _seqCnt = 1;//cnt of colors (should be less then SEQ_SIZE)                
         //util        
-        unsigned long _tLastFade = 0;
         unsigned long _tLastColor = 0;
         unsigned long _now = 0;
         uint32_t _r = 0; 
@@ -30,11 +30,12 @@ class Blinker2
         uint32_t moveToTarget(uint32_t c, uint32_t t);
         uint8_t _targetBrightness;
         void init();
+        Ticker _tickerLoop;
+        void updateLoopTicker();
     public:    
         Blinker2(Adafruit_NeoPixel &pixels);
         Blinker2(Adafruit_NeoPixel &pixels, uint8_t brightness);
-        void start();
-        void loop();        
+        void start();     
         void setSeqCnt(int seqCnt);        
         void setColorDelay(int colorDelay);
         void setDelta(int delta);
@@ -48,6 +49,7 @@ class Blinker2
         uint32_t getSeqIndex();
         void setMaxBrightness(uint8_t val);
         void initBrightness(uint8_t val);
+        void loop();
 
 };
 
