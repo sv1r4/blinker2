@@ -5,7 +5,9 @@
 #include <Adafruit_NeoPixel.h>
 #include <Ticker.h>
 
+#ifndef SEQ_SIZE
 #define SEQ_SIZE  64
+#endif
 
 class Blinker2
 {
