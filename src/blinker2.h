@@ -21,12 +21,12 @@ class Blinker2
         uint32_t _speedCur = 1;
         uint32_t _colorDelay;//ms
         uint32_t _delta = 10;
-        uint32_t _seq[SEQ_SIZE][PIXELS];//array of colors
+        uint32_t _seq[PIXELS][SEQ_SIZE];//array of colors
         uint32_t _seqIndex;
         uint32_t _seqCnt = 0;//cnt of colors (should be less then SEQ_SIZE)                
         //util        
-        unsigned long _now[PIXELS];
         unsigned long _tLastColor[PIXELS];
+        bool _isColorDelayDone[PIXELS];
         uint32_t _r[PIXELS];
         uint32_t _g[PIXELS];
         uint32_t _b[PIXELS]; 
