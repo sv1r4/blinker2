@@ -6,27 +6,30 @@
 #include <Ticker.h>
 
 #ifndef SEQ_SIZE
-#define SEQ_SIZE  64
+#define SEQ_SIZE  12
+#endif
+
+#ifndef PIXELS
+#define PIXELS 3
 #endif
 
 class Blinker2
 {
     private:       
-        uint16_t _pixelsCnt;
         Adafruit_NeoPixel &_pixels;        
         uint32_t _speed[SEQ_SIZE];//array of ms
         uint32_t _speedCur = 1;
-        uint32_t _colorDelay = 0;//ms
+        uint32_t _colorDelay;//ms
         uint32_t _delta = 10;
-        uint32_t _seq[SEQ_SIZE];//array of colors
-        uint32_t _seqIndex = 0;//current color
-        uint32_t _seqCnt = 1;//cnt of colors (should be less then SEQ_SIZE)                
+        uint32_t _seq[SEQ_SIZE][PIXELS];//array of colors
+        uint32_t _seqIndex;
+        uint32_t _seqCnt = 0;//cnt of colors (should be less then SEQ_SIZE)                
         //util        
-        unsigned long _tLastColor = 0;
-        unsigned long _now = 0;
-        uint32_t _r = 0; 
-        uint32_t _g = 0;
-        uint32_t _b = 0;        
+        unsigned long _now[PIXELS];
+        unsigned long _tLastColor[PIXELS];
+        uint32_t _r[PIXELS];
+        uint32_t _g[PIXELS];
+        uint32_t _b[PIXELS]; 
         //methods
         uint32_t getC(uint32_t color, byte i);
         uint32_t moveToTarget(uint32_t c, uint32_t t);
@@ -41,16 +44,17 @@ class Blinker2
         void setSeqCnt(int seqCnt);        
         void setColorDelay(int colorDelay);
         void setDelta(int delta);
-        void setSeqColor(uint16_t index, int color, uint32_t speed);
+        void setSeqColor(uint16_t index, int color, uint32_t speed, uint8_t p);
         uint32_t getSeqCnt();
         int getColorDelay();
         int getDelta();
-        int getSeqColor(uint16_t index);
+        int getSeqColor(uint16_t index, uint8_t p);
         uint32_t getSpeedColor(uint16_t index);
         void setSeqIndex(uint32_t index);
         uint32_t getSeqIndex();
         void setMaxBrightness(uint8_t val);
         void initBrightness(uint8_t val);
+        bool loopPixel(uint8_t p);
         void loop();
 
 };
