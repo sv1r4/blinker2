@@ -6,9 +6,8 @@
 #define SSID "balloon"
 #define PASSWORD "balL00n17988028"
 #define LED 13
-#define NUMPIXELS 3
 ESP8266WebServer http(80);
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LED, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PIXELS, LED, NEO_GRB + NEO_KHZ800);
 Blinker2 blinker(pixels, 255);
 bool wasConnected;
 

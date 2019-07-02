@@ -10,7 +10,7 @@
 #endif
 
 #ifndef PIXELS
-#define PIXELS 3
+#define PIXELS 4
 #endif
 
 class Blinker2
