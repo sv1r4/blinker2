@@ -6,7 +6,7 @@
 #include <Ticker.h>
 
 #ifndef SEQ_SIZE
-#define SEQ_SIZE  12
+#define SEQ_SIZE  10
 #endif
 
 #ifndef PIXELS
