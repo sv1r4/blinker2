@@ -1,13 +1,11 @@
 #include "blinker2.h"
 
-Blinker2::Blinker2(Adafruit_NeoPixel &pixels) : _pixels(pixels),
-                                                _pixelsCnt(pixels.numPixels())
+Blinker2::Blinker2(Adafruit_NeoPixel &pixels) : _pixels(pixels)
 {
     init();
 }
 
-Blinker2::Blinker2(Adafruit_NeoPixel &pixels, uint8_t brightness) : _pixels(pixels),
-                                                _pixelsCnt(pixels.numPixels())
+Blinker2::Blinker2(Adafruit_NeoPixel &pixels, uint8_t brightness) : _pixels(pixels)
 {
     init();
     _targetBrightness = brightness;
@@ -18,7 +16,9 @@ void Blinker2::init()
 {
     for (uint16_t i = 0; i < SEQ_SIZE; i++)
     {
-        _speed[i] = 10;
+        for(uint16_t j = 0; j< PIXELS; j++){
+            _speed[i] = 10;
+        }
     }
 }
 
@@ -31,52 +31,74 @@ void Blinker2::start()
 }
 
 void Blinker2::updateLoopTicker(){
+    //todo fix hardcode 3 pixels
+    
     _tickerLoop.detach();
     std::function<void(void)> fTickerLoop = std::bind(&Blinker2::loop, this);
     _tickerLoop.attach_ms(_speed[_seqIndex], fTickerLoop);
+    
 }
 
-void Blinker2::loop()
-{
-    _now = millis();
+void Blinker2::loop(){
+    bool allDone = true;    
+    for(uint8_t p =0;p<PIXELS;p++){
+        if(!loopPixel(p)){
+            allDone = false;
+        }
+    }
+
+    if(allDone){        
+        _seqIndex++; 
+        if (_seqIndex >= _seqCnt)
+        { 
+            _seqIndex = 0;                
+        }
+        Serial.printf("all done move to seqindex %d\n", _seqIndex);
+        updateLoopTicker();   
+    }
+    
+}
+
+
+bool Blinker2::loopPixel(uint8_t p)
+{    
+    unsigned long now = millis();
 
     //get target color
-    auto r = getC(_seq[_seqIndex], 0);
-    auto g = getC(_seq[_seqIndex], 1);
-    auto b = getC(_seq[_seqIndex], 2);
+    auto r = getC(_seq[p][_seqIndex], 0);
+    auto g = getC(_seq[p][_seqIndex], 1);
+    auto b = getC(_seq[p][_seqIndex], 2);
     uint8_t currentBrightness = _pixels.getBrightness();
-    bool wasOk = _r == r && _b == b && _g == g && currentBrightness == _targetBrightness;
+    bool wasOk = _r[p] == r && _b[p] == b && _g[p] == g && currentBrightness == _targetBrightness;
 
-    _r = moveToTarget(_r, r);
-    _g = moveToTarget(_g, g);
-    _b = moveToTarget(_b, b);
+    _r[p] = moveToTarget(_r[p], r);
+    _g[p] = moveToTarget(_g[p], g);
+    _b[p] = moveToTarget(_b[p], b);
 
-    if (_r == r && _b == b && _g == g)
-    { //target achived
+    //if last pixel in seq
+    if (_r[p] == r && _b[p] == b && _g[p] == g)
+    { 
+        //target achived
         //check time for change color to next in sequnece
-        if (_now - _tLastColor >= _colorDelay)
+        bool isColorDelayDone = now - _tLastColor[p] >= _colorDelay;
+        if (isColorDelayDone)
         {
-            _tLastColor = _now;
-            _seqIndex++;
-            updateLoopTicker();
-            // Serial.printf("change color to #%d\n", _seqIndex);
-            if (_seqIndex >= _seqCnt)
-            { //loop colors
-                //Serial.println("reset sequence");
-                _seqIndex = 0;
-                _tLastColor = _now;
-            }
+            _isColorDelayDone[p] = true;
+            _tLastColor[p] = now;
         }
         if (wasOk)
         {
-            return;
+          //  Serial.printf("was ok %d\n", p);
+            return _isColorDelayDone[p];
         }
+    }else{
+        _isColorDelayDone[p] = false;
     }
+    
 
-    for (uint16_t i = 0; i < _pixelsCnt; i++)
-    {
-        _pixels.setPixelColor(i, (uint8_t)_r, (uint8_t)_g, (uint8_t)_b);
-    }
+    //Serial.printf("set pixel %d b= %d\n", p, (uint8_t)_b[p]);
+    _pixels.setPixelColor(p, (uint8_t)_r[p], (uint8_t)_g[p], (uint8_t)_b[p]);
+
 
 #pragma region fade brightness
     
@@ -89,7 +111,9 @@ void Blinker2::loop()
         _pixels.setBrightness(--currentBrightness);
     }
 #pragma endregion
+
     _pixels.show();
+    return false;
 }
 
 void Blinker2::setSeqCnt(int seqCnt)
@@ -100,7 +124,7 @@ void Blinker2::setSeqCnt(int seqCnt)
         return;
     }
     _seqCnt = seqCnt;
-    //Serial.printf("set _seqCnt = %d\n", _seqCnt);
+    Serial.printf("set _seqCnt = %d\n", _seqCnt);
 }
 
 void Blinker2::setColorDelay(int colorDelay)
@@ -111,7 +135,7 @@ void Blinker2::setColorDelay(int colorDelay)
         return;
     }
     _colorDelay = colorDelay;
-    //Serial.printf("set _colorDelay = %d\n", _colorDelay);
+    Serial.printf("set  _colorDelay = %d\n", _colorDelay);
 }
 
 void Blinker2::setDelta(int delta)
@@ -122,19 +146,19 @@ void Blinker2::setDelta(int delta)
         return;
     }
     _delta = delta;
-    //Serial.printf("set _delta = %d\n", _delta);
+    Serial.printf("set _delta = %d\n", _delta);
 }
 
-void Blinker2::setSeqColor(uint16_t index, int color, uint32_t speed)
+void Blinker2::setSeqColor(uint16_t index, int color, uint32_t speed, uint8_t p)
 {
     if (index >= _seqCnt || index < 0)
     {
         Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
         return;
     }
-    _seq[index] = color;
+    _seq[p][index] = color;
     _speed[index] = speed;
-    // Serial.printf("set _seq[%d]= %#08x\n", index, _seq[index]);
+     Serial.printf("set pixel #%d._seq[%d]= %#08x\n", p, index, _seq[p][index]);
 }
 
 uint32_t Blinker2::getSeqCnt()
@@ -149,14 +173,14 @@ int Blinker2::getDelta()
 {
     return _delta;
 }
-int Blinker2::getSeqColor(uint16_t index)
+int Blinker2::getSeqColor(uint16_t index, uint8_t p)
 {
     if (index >= _seqCnt || index < 0)
     {
         Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
         return 0;
     }
-    return _seq[index];
+    return _seq[p][index];
 }
 
 uint32_t Blinker2::getSpeedColor(uint16_t index)

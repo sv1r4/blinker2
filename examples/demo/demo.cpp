@@ -6,10 +6,9 @@
 #define SSID "balloon"
 #define PASSWORD "balL00n17988028"
 #define LED 13
-#define NUMPIXELS 3
 ESP8266WebServer http(80);
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LED, NEO_GRB + NEO_KHZ800);
-Blinker2 blinker(pixels);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PIXELS, LED, NEO_GRB + NEO_KHZ800);
+Blinker2 blinker(pixels, 255);
 bool wasConnected;
 
 void initOta()
@@ -89,15 +88,21 @@ void onConfig()
         blinker.setSeqCnt(seqCnt);
         blinker.setColorDelay(root["colorDelay"]);
         blinker.setDelta(root["delta"]);
-        for (int i = 0; i < seqCnt; i++)
-        {
-            blinker.setSeqColor(i, root["seq"][i], root["speed"][i]);
+
+        for(uint8_t p = 0; p < PIXELS ; p++){
+            
+            for (int i = 0; i < seqCnt; i++)
+            {
+                blinker.setSeqColor(i, root["seq"][p][i], root["speed"][i], p);
+            }
+
         }
+        
 
         http.send(200, "text/plain", "got config");
     }
     else if (http.method() == HTTP_GET)
-    {
+    {          
         String json = "{";
         int seqCnt = blinker.getSeqCnt();
         json.concat("\"seqCnt\":");
@@ -106,25 +111,36 @@ void onConfig()
         json.concat(blinker.getColorDelay());
         json.concat(",\"delta\":");
         json.concat(blinker.getDelta());
-
-        json.concat(",\"seq\":[");
-        for (int i = 0; i < seqCnt - 1; i++)
-        {
-            json.concat(blinker.getSeqColor(i));
-            json.concat(",");
-        }
-        json.concat(blinker.getSeqColor(seqCnt - 1));
-        json.concat("]");
-
         json.concat(",\"speed\":[");
-        for (int i = 0; i < seqCnt - 1; i++)
+        for (int i = 0; i < seqCnt; i++)
         {
             json.concat(blinker.getSpeedColor(i));
-            json.concat(",");
+            if(i<seqCnt-1){
+                json.concat(",");
+            }
         }
-        json.concat(blinker.getSpeedColor(seqCnt - 1));
-        json.concat("]");
-        json.concat("}");
+
+        json.concat("],\"seq\":[");
+
+
+        for(uint8_t p = 0; p < PIXELS ; p++){
+            json.concat("[");
+            for (int i = 0; i < seqCnt; i++)
+            {
+                json.concat(blinker.getSeqColor(i, p));
+                if(i<seqCnt-1){
+                    json.concat(",");
+                }
+            }
+            json.concat("]");
+
+
+            if(p<PIXELS-1){
+                json.concat(",");
+            }
+        }
+        json.concat("]}");
+        
 
         Serial.println("Get config");
         Serial.println(json);
@@ -168,6 +184,8 @@ void setup()
     WiFi.begin(SSID, PASSWORD);
     //   WiFi.softAP(apSsidStr.c_str());
 
+    initOta();
+
     http.stop();
     http.on("/api/config", onConfig);
     http.begin();
@@ -179,7 +197,6 @@ void loop()
     if (!wasConnected && WiFi.status() == WL_CONNECTED)
     {
         delay(1000);
-        initOta();
         wasConnected = true;
         Serial.printf("Connected ip:%s\n",
                       WiFi.localIP().toString().c_str());
@@ -191,7 +208,6 @@ void loop()
     {
         wasConnected = false;
     }
-
     http.handleClient();
     ArduinoOTA.handle();
 }
