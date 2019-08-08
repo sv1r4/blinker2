@@ -13,3 +13,4 @@
 .vscode/*.DB*
 .vscode/.browse.c_cpp.db*
 .vscode/ipch
+.pio
