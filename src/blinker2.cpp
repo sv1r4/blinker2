@@ -53,7 +53,7 @@ void Blinker2::loop(){
         { 
             _seqIndex = 0;                
         }
-        Serial.printf("all done move to seqindex %d\n", _seqIndex);
+        //Serial.printf("all done move to seqindex %d\n", _seqIndex);
         updateLoopTicker();   
     }
     
@@ -120,45 +120,45 @@ void Blinker2::setSeqCnt(int seqCnt)
 {
     if (seqCnt > SEQ_SIZE || seqCnt < 1)
     {
-        Serial.printf("seqCnt=%d is out of range [1, %d]\n", seqCnt, SEQ_SIZE);
+        //Serial.printf("seqCnt=%d is out of range [1, %d]\n", seqCnt, SEQ_SIZE);
         return;
     }
     _seqCnt = seqCnt;
-    Serial.printf("set _seqCnt = %d\n", _seqCnt);
+    //Serial.printf("set _seqCnt = %d\n", _seqCnt);
 }
 
 void Blinker2::setColorDelay(int colorDelay)
 {
     if (colorDelay < 0)
     {
-        Serial.printf("colorDelay=%d is out of range [0, maxint]\n", colorDelay);
+        //Serial.printf("colorDelay=%d is out of range [0, maxint]\n", colorDelay);
         return;
     }
     _colorDelay = colorDelay;
-    Serial.printf("set  _colorDelay = %d\n", _colorDelay);
+    //Serial.printf("set  _colorDelay = %d\n", _colorDelay);
 }
 
 void Blinker2::setDelta(int delta)
 {
     if (delta > 255 || delta < 0)
     {
-        Serial.printf("delta=%d is out of range [0, 255]\n", delta);
+        //Serial.printf("delta=%d is out of range [0, 255]\n", delta);
         return;
     }
     _delta = delta;
-    Serial.printf("set _delta = %d\n", _delta);
+    //Serial.printf("set _delta = %d\n", _delta);
 }
 
 void Blinker2::setSeqColor(uint16_t index, int color, uint32_t speed, uint8_t p)
 {
     if (index >= _seqCnt || index < 0)
     {
-        Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
+        //Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
         return;
     }
     _seq[p][index] = color;
     _speed[index] = speed;
-     Serial.printf("set pixel #%d._seq[%d]= %#08x\n", p, index, _seq[p][index]);
+     //Serial.printf("set pixel #%d._seq[%d]= %#08x\n", p, index, _seq[p][index]);
 }
 
 uint32_t Blinker2::getSeqCnt()
@@ -177,7 +177,7 @@ int Blinker2::getSeqColor(uint16_t index, uint8_t p)
 {
     if (index >= _seqCnt || index < 0)
     {
-        Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
+        //Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
         return 0;
     }
     return _seq[p][index];
@@ -187,7 +187,7 @@ uint32_t Blinker2::getSpeedColor(uint16_t index)
 {
     if (index >= _seqCnt || index < 0)
     {
-        Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
+        //Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
         return 0;
     }
     return _speed[index];
@@ -197,7 +197,7 @@ void Blinker2::setSeqIndex(uint32_t index)
 {
     if (index >= _seqCnt || index < 0)
     {
-        Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
+        //Serial.printf("index=%d is out of range [0, %d]\n", index, (_seqCnt - 1));
         return;
     }
     _seqIndex = index;
@@ -210,12 +210,12 @@ uint32_t Blinker2::getSeqIndex()
 
 void Blinker2::setMaxBrightness(uint8_t val)
 {
-    Serial.printf("set _targetBrightness= %i\n", val);
+    //Serial.printf("set _targetBrightness= %i\n", val);
     _targetBrightness = val;
 }
 
 void Blinker2::initBrightness(uint8_t val){
-    Serial.printf("init brightness to %i\n", val);
+    //Serial.printf("init brightness to %i\n", val);
     _pixels.setBrightness(val);
     _pixels.show();
 }
