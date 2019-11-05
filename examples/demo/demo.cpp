@@ -3,8 +3,8 @@
 #include <ArduinoJson.h>
 #include <ArduinoOTA.h>
 
-#define SSID "balloon"
-#define PASSWORD "balL00n17988028"
+#define SSID ""
+#define PASSWORD ""
 #define LED 13
 ESP8266WebServer http(80);
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PIXELS, LED, NEO_GRB + NEO_KHZ800);
